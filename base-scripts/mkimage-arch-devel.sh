@@ -15,7 +15,7 @@ EXPECT=$(which expect)
     exit 1
 }
 
-[[ "$1" ]] && IMAGE_NAME="$1" || IMAGE_NAME="archlinux:base-devel"
+[[ "$1" ]] && IMAGE_NAME="$1" || IMAGE_NAME="arch-base-devel:$(date +%F)"
 
 ROOTFS=~/rootfs-arch-$$-$RANDOM
 mkdir $ROOTFS

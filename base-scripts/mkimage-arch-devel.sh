@@ -15,7 +15,9 @@ EXPECT=$(which expect)
     exit 1
 }
 
-[[ "$1" ]] && IMAGE_NAME="$1" || IMAGE_NAME="arch-base-devel:$(date +%F)"
+IMAGE_NAME="$1"
+[[ "$IMAGE_NAME" ]] && [[ "$(echo ${IMAGE_NAME} | sed -re 's/:.*/:/g')" == "$IMAGE_NAME" ]] && IMAGE_NAME="$(echo ${IMAGE_NAME} | sed -e 's/://g'):$(date +%F)"
+[[ ! "$IMAGE_NAME" ]] && IMAGE_NAME="arch-base-devel:$(date +%F)"
 
 ROOTFS=~/rootfs-arch-$$-$RANDOM
 mkdir $ROOTFS

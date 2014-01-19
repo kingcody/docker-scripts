@@ -65,5 +65,5 @@ mknod -m 600 ${DEV}/initctl p
 mknod -m 666 ${DEV}/ptmx c 5 2
 
 tar --numeric-owner -C $ROOTFS -c . | docker import - $IMAGE_NAME
-docker run -i -t archlinux echo Success.
+docker run -i -t $IMAGE_NAME echo Success.
 rm -rf $ROOTFS

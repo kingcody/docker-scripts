@@ -15,6 +15,10 @@ EXPECT=$(which expect)
     exit 1
 }
 
+IMAGE_NAME="$1"
+[[ "$IMAGE_NAME" ]] && [[ "$(echo ${IMAGE_NAME} | sed -re 's/:.*/:/g')" == "$IMAGE_NAME" ]] && IMAGE_NAME="$(echo ${IMAGE_NAME} | sed -e 's/://g'):$(date +%Y.%m.%d)"
+[[ ! "$IMAGE_NAME" ]] && IMAGE_NAME="arch-base:$(date +%Y.%m.%d)"
+
 ROOTFS=~/rootfs-arch-$$-$RANDOM
 mkdir $ROOTFS
 
@@ -62,6 +66,11 @@ mknod -m 666 ${DEV}/full c 1 7
 mknod -m 600 ${DEV}/initctl p
 mknod -m 666 ${DEV}/ptmx c 5 2
 
-tar --numeric-owner -C $ROOTFS -c . | docker import - archlinux
-docker run -i -t archlinux echo Success.
+tar --numeric-owner -C $ROOTFS -c . | docker import - $IMAGE_NAME
+docker run -i -t $IMAGE_NAME echo Success.
+
+IMAGE_NAME_SHORT="$(echo $IMAGE_NAME | sed -e 's/:.*//g')"
+IMAGE_ID="$(docker images $IMAGE_NAME_SHORT | grep $IMAGE_NAME_SHORT | head -n 1 | awk '{print $3}')"
+docker tag ${IMAGE_ID} ${IMAGE_NAME_SHORT}:latest
+
 rm -rf $ROOTFS

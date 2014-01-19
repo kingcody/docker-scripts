@@ -1,0 +1,24 @@
+#!/bin/bash
+
+ID="$1"
+MPATH=$(mount | grep "$ID" | awk '{print $3}' | head -n 1 | sed -e "s;$ID.*;;g")
+ID=$(mount | grep "$ID" | awk '{print $3}' | head -n 1 | sed -e "s;.*\($ID[a-zA-Z0-9]*\).*;\1;g")
+
+function unmount {
+  [[ "$(mount | grep $1)" ]] && umount $1
+}
+
+function multi_unmount {
+  [[ "$(mount | grep $1)" ]] && mount | grep "$1" | awk '{print $3}' | xargs umount
+}
+
+if [[ "$ID" ]]; then
+
+
+  multi_unmount "${MPATH}${ID}/"
+  unmount "${MPATH}${ID}-init"
+  unmount "${MPATH}${ID}"
+
+  docker rm ${ID}
+
+fi

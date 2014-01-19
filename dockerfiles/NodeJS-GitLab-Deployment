@@ -1,0 +1,15 @@
+# NodeJS (GitLab-Deployment)
+#
+# VERSION               0.0.3
+
+# Base from digitallyseamless/nodejs-arch
+FROM      digitallyseamless/nodejs-arch
+
+# Author: Digitally Seamless
+MAINTAINER Digitally Seamless <docker@digitallyseamless.com>
+
+# Install GitLab Deployment SSH keys
+RUN bash -c 'mkdir -p /root/.ssh && echo -e "YOUR_ESCAPED_DEPLOYMENT_SSH_PRIVATE_KEY" > /root/.ssh/id_rsa && echo "YOUR_DEPLOYMENT_SSH_PUBLIC_KEY" > /root/.ssh/id_rsa.pub && chmod -R 600 /root/.ssh'
+
+# Add GitLab Server to known_hosts
+RUN bash -c 'echo "YOUR_GITLAB_SSH_PUBLIC_KEY" >> /root/.ssh/known_hosts'

@@ -15,6 +15,8 @@ EXPECT=$(which expect)
     exit 1
 }
 
+[[ "$1" ]] && IMAGE_NAME="$1" || IMAGE_NAME="archlinux:base-devel"
+
 ROOTFS=~/rootfs-arch-$$-$RANDOM
 mkdir $ROOTFS
 
@@ -65,6 +67,6 @@ mknod -m 666 ${DEV}/full c 1 7
 mknod -m 600 ${DEV}/initctl p
 mknod -m 666 ${DEV}/ptmx c 5 2
 
-tar --numeric-owner -C $ROOTFS -c . | docker import - archlinux
+tar --numeric-owner -C $ROOTFS -c . | docker import - $IMAGE_NAME
 docker run -i -t archlinux echo Success.
 rm -rf $ROOTFS

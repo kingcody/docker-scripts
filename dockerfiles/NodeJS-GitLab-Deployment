@@ -1,9 +1,9 @@
 # NodeJS (GitLab-Deployment)
 #
-# VERSION               0.0.2
+# VERSION               0.0.3
 
-# Base from digitallyseamless/nodejs:arch
-FROM      digitallyseamless/nodejs:arch
+# Base from digitallyseamless/nodejs-arch
+FROM      digitallyseamless/nodejs-arch
 
 # Author: Digitally Seamless
 MAINTAINER Digitally Seamless <docker@digitallyseamless.com>

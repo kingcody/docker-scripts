@@ -23,7 +23,7 @@ ROOTFS=~/rootfs-arch-$$-$RANDOM
 mkdir $ROOTFS
 
 # custom base-devel install group
-BASE_DEVEL="base-devel git rsync strace net-tools dnsutils htop"
+BASE_DEVEL="base-devel git openssh rsync strace net-tools dnsutils htop"
 
 #packages to ignore for space savings
 PKGIGNORE=linux,jfsutils,lvm2,cryptsetup,groff,man-db,man-pages,mdadm,pciutils,pcmciautils,reiserfsprogs,s-nail,xfsprogs

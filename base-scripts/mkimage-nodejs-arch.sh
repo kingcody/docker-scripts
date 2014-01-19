@@ -87,4 +87,9 @@ mknod -m 666 ${DEV}/ptmx c 5 2
 
 tar --numeric-owner -C $ROOTFS -c . | docker import - $IMAGE_NAME
 docker run -i -t $IMAGE_NAME echo Success.
+
+IMAGE_NAME_SHORT="$(echo $IMAGE_NAME | sed -e 's/:.*//g')"
+IMAGE_ID="$(docker images $IMAGE_NAME_SHORT | grep $IMAGE_NAME_SHORT | head -n 1 | awk '{print $3}')"
+docker tag ${IMAGE_ID} ${IMAGE_NAME_SHORT}:latest
+
 rm -rf $ROOTFS

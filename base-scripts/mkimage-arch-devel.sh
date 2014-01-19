@@ -18,13 +18,16 @@ EXPECT=$(which expect)
 ROOTFS=~/rootfs-arch-$$-$RANDOM
 mkdir $ROOTFS
 
+# custom base-devel install group
+BASE_DEVEL="base-devel git rsync strace net-tools dnsutils htop"
+
 #packages to ignore for space savings
 PKGIGNORE=linux,jfsutils,lvm2,cryptsetup,groff,man-db,man-pages,mdadm,pciutils,pcmciautils,reiserfsprogs,s-nail,xfsprogs
  
 expect <<EOF
   set timeout 60
   set send_slow {1 1}
-  spawn pacstrap -c -d -G -i $ROOTFS base haveged --ignore $PKGIGNORE
+  spawn pacstrap -c -d -G -i $ROOTFS base $BASE_DEVEL haveged --ignore $PKGIGNORE
   expect {
     "Install anyway?" { send n\r; exp_continue }
     "(default=all)" { send \r; exp_continue }

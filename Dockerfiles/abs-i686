@@ -1,0 +1,31 @@
+# Arch Build Enviroment (i686)
+#
+# VERSION               0.0.3
+
+# Base from digitallyseamless/arch-ds-devel-i686
+FROM      digitallyseamless/arch-ds-devel-i686
+
+# Author: Digitally Seamless
+MAINTAINER Digitally Seamless <docker@digitallyseamless.com>
+
+RUN ln -s /proc/self/fd /dev/fd
+
+RUN pacman -Syu --noconfirm
+
+RUN useradd -m -g users -G root,disk,network,storage,power -s /bin/sh dsadmin
+
+RUN echo "dsadmin ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+ADD configs/makepkg.conf /etc/
+ADD configs/pacman.conf /etc/
+ADD configs/yaourtrc /etc/
+
+ADD build-pkg /home/dsadmin/
+
+RUN mkdir -p /home/dsadmin/imported_builds /home/dsadmin/exported_pkgs /home/dsadmin/build_dir
+
+RUN chown -R dsadmin:users /home/dsadmin
+
+VOLUME ["/var/cache/pacman/pkg", "/home/dsadmin/imported_builds", "/home/dsadmin/exported_pkgs", "/home/dsadmin/build_repo"]
+
+USER dsadmin

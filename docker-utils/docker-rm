@@ -1,24 +1,36 @@
 #!/bin/bash
 
-ID="$1"
-MPATH=$(mount | grep "$ID" | awk '{print $3}' | head -n 1 | sed -e "s;$ID.*;;g")
-ID=$(mount | grep "$ID" | awk '{print $3}' | head -n 1 | sed -e "s;.*\($ID[a-zA-Z0-9]*\).*;\1;g")
+APPNAME=$(basename $0)
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-function unmount {
-  [[ "$(mount | grep $1)" ]] && umount $1
-}
+if [[ "$1" == "all" ]]; then
+  $DIR/$APPNAME $(docker ps -a | tail -n +2 | awk '{print $1}')
+else
+  function unmount {
+    [[ "$(mount | grep $1)" ]] && umount -R $1
+  }
 
-function multi_unmount {
-  [[ "$(mount | grep $1)" ]] && mount | grep "$1" | awk '{print $3}' | xargs umount
-}
+  function multi_unmount {
+    [[ "$(mount | grep $1)" ]] && mount | grep "$1" | awk '{print $3}' | xargs umount -R
+  }
 
-if [[ "$ID" ]]; then
+  while [[ "$1" ]]; do
+    ID="$1"
+    MPATH=$(mount | grep "$ID" | awk '{print $3}' | head -n 1 | sed -e "s;$ID.*;;g")
+    ID=$(mount | grep "$ID" | awk '{print $3}' | head -n 1 | sed -e "s;.*\($ID[a-zA-Z0-9]*\).*;\1;g")
+
+    if [[ "$ID" ]]; then
 
 
-  multi_unmount "${MPATH}${ID}/"
-  unmount "${MPATH}${ID}-init"
-  unmount "${MPATH}${ID}"
+      multi_unmount "${MPATH}${ID}/"
+      unmount "${MPATH}${ID}-init"
+      unmount "${MPATH}${ID}"
 
-  docker rm ${ID}
+      docker rm ${ID}
 
+    fi
+
+    shift
+  done
 fi
+

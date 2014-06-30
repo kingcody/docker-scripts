@@ -15,9 +15,11 @@ EXPECT=$(which expect)
     exit 1
 }
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 IMAGE_NAME="$1"
 [[ "$IMAGE_NAME" ]] && [[ "$(echo ${IMAGE_NAME} | sed -re 's/:.*/:/g')" == "$IMAGE_NAME" ]] && IMAGE_NAME="$(echo ${IMAGE_NAME} | sed -e 's/://g'):$(date +%Y.%m.%d)"
-[[ ! "$IMAGE_NAME" ]] && IMAGE_NAME="nodejs-arch:$(date +%Y.%m.%d)"
+[[ ! "$IMAGE_NAME" ]] && IMAGE_NAME="arch-ds-devel-i686:$(date +%Y.%m.%d)"
 
 ROOTFS=~/rootfs-arch-$$-$RANDOM
 mkdir $ROOTFS
@@ -28,16 +30,13 @@ BASE_DEVEL="base-devel git openssh rsync strace net-tools dnsutils htop"
 # digitally seamless related/prefered packages
 DS_DEVEL="digitallyseamless-rootca yaourt"
 
-# nodejs packages
-NODEJS="nodejs"
-
 #packages to ignore for space savings
 PKGIGNORE=linux,jfsutils,lvm2,cryptsetup,groff,man-db,man-pages,mdadm,pciutils,pcmciautils,reiserfsprogs,s-nail,xfsprogs
  
 expect <<EOF
   set timeout 60
   set send_slow {1 1}
-  spawn pacstrap -c -d -G -i $ROOTFS base $BASE_DEVEL $DS_DEVEL $NODEJS haveged --ignore $PKGIGNORE
+  spawn pacstrap -C ${SCRIPT_DIR}/config/pacman.i686.conf -c -d -G -i $ROOTFS base $BASE_DEVEL $DS_DEVEL haveged --ignore $PKGIGNORE
   expect {
     "Install anyway?" { send n\r; exp_continue }
     "(default=all)" { send \r; exp_continue }
@@ -57,14 +56,12 @@ en_US ISO-8859-1
 DELIM
 arch-chroot $ROOTFS locale-gen
 
-# install nodejs devel enviroment
-arch-chroot $ROOTFS /bin/sh -c 'npm install -g bower grunt-cli'
-arch-chroot $ROOTFS /bin/sh -c 'mkdir -p /srv/node'
-
 # install archlinuxfr repo
-arch-chroot $ROOTFS /bin/sh -c 'echo -e "\n[archlinuxfr]\nSigLevel = Never\nServer = http://repo.archlinux.fr/$arch" >> /etc/pacman.conf'
+# arch-chroot $ROOTFS /bin/sh -c 'echo -e "\n[archlinuxfr]\nSigLevel = Never\nServer = http://repo.archlinux.fr/$arch" >> /etc/pacman.conf'
 # install digitally seamless arch repo
-arch-chroot $ROOTFS /bin/sh -c 'echo -e "\n[digitallyseamless]\nSigLevel = Never\nServer = http://digitallyseamless.com/archlinux/repos/\$repo/\$arch" >> /etc/pacman.conf'
+# arch-chroot $ROOTFS /bin/sh -c 'echo -e "\n[digitallyseamless]\nSigLevel = Never\nServer = http://digitallyseamless.com/archlinux/repos/\$repo/\$arch" >> /etc/pacman.conf'
+
+cp "${SCRIPT_DIR}/config/pacman.i686.conf" "${ROOTFS}/etc/pacman.conf"
 
 arch-chroot $ROOTFS /bin/sh -c 'echo "Server = http://mirrors.kernel.org/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist'
 
@@ -86,7 +83,7 @@ mknod -m 600 ${DEV}/initctl p
 mknod -m 666 ${DEV}/ptmx c 5 2
 
 tar --numeric-owner -C $ROOTFS -c . | docker import - $IMAGE_NAME
-docker run -i -t --rm $IMAGE_NAME echo Success.
+docker run -i -t $IMAGE_NAME echo Success.
 
 IMAGE_NAME_SHORT="$(echo $IMAGE_NAME | sed -e 's/:.*//g')"
 IMAGE_ID="$(docker images $IMAGE_NAME_SHORT | grep $IMAGE_NAME_SHORT | head -n 1 | awk '{print $3}')"
